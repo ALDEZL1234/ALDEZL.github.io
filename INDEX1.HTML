@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="ar">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Quiz Zone - ???????? ????? ????? (Tech Ed)</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="wrap">
+      <h1 class="logo">Quiz Zone</h1>
+      <p class="subtitle">Exam hub — ??? ????????? ???????</p>
+    </div>
+  </header>
+
+  <main class="wrap main">
+    <section id="home" class="grid-section">
+      <!-- 8 ????: ??????? ???? ????? ?? ??????? ???? -->
+    </section>
+
+    <section id="subject-view" class="subject-view hidden">
+      <button id="backBtn" class="back">? ??????</button>
+      <h2 id="subjectTitle" class="subject-title"></h2>
+      <p id="subjectDesc" class="subject-desc"></p>
+
+      <ul id="examsList" class="exams-list"></ul>
+    </section>
+
+    <section id="exam-view" class="exam-view hidden">
+      <button id="backToSubject" class="back">? ???? ??????</button>
+      <h3 id="examTitle"></h3>
+      <div id="examContent" class="exam-content"></div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="wrap">
+      <small>Quiz Zone — Bank of exams for Tech Ed • © <span id="year"></span></small>
+    </div>
+  </footer>
+
+<script>
+/* ====== ?????? ?????? ??????????? ======
+   ???? ??????? ??????????? ???. 
+   ??? ????: id, name, desc, exams: [{id, title, type, href, content}]
+   type = 'pdf' ?? 'inline'
+   ??? pdf: ?? href = 'exams/file.pdf' (???? ????? ????? exams ?? ??????)
+   ??? inline: ?? content = HTML ??? ???????
+*/
+const subjects = [
+  { id: 's1', name: 'Instructional Design', desc: 'Design & methods — ???????? ??????', exams: [
+    { id: 's1e1', title: 'Lesson 1 — Foundations', type: 'inline', content: `<ol><li>???? 1: ???? ???? ??? ADDIE.</li><li>???? 2: ???? ???? ????? ?? ???????.</li></ol>` },
+    { id: 's1e2', title: 'Lesson 2 — Analysis', type: 'pdf', href: 'exams/instructional_analysis.pdf' }
+  ]},
+  { id: 's2', name: 'Educational Technology', desc: 'Tools & platforms', exams: [
+    { id: 's2e1', title: 'Lesson 1 — Intro', type: 'inline', content: `<p>?????? ?????: ??? ?????? ??????????? ???? ????.</p>` },
+    { id: 's2e2', title: 'Lesson 3 — LMS', type: 'pdf', href: 'exams/lms_quiz.pdf' }
+  ]},
+  { id: 's3', name: 'Media Production', desc: 'Audio & video basics', exams: [
+    { id: 's3e1', title: 'Lesson 1 — Basics', type: 'inline', content: `<p>?? ????? ????? ?????? ????? ??????.</p>` }
+  ]},
+  { id: 's4', name: 'Assessment & Evaluation', desc: 'Designing tests', exams: [
+    { id: 's4e1', title: 'Lesson 2 — Types of assessment', type: 'inline', content: `<ol><li>?? ????? ??? formative ?summative?</li></ol>` }
+  ]},
+  { id: 's5', name: 'Instructional Media', desc: 'Graphics & slides', exams: [
+    { id: 's5e1', title: 'Lesson 4 — Slides design', type: 'inline', content: `<p>????? ????? ????? ?????.</p>` }
+  ]},
+  { id: 's6', name: 'E-Learning Design', desc: 'Online course creation', exams: [
+    { id: 's6e1', title: 'Lesson 2 — Course storyboard', type: 'inline', content: `<p>???? storyboard ???? ????? ?????.</p>` }
+  ]},
+  { id: 's7', name: 'Technology in Education', desc: 'Trends & uses', exams: [
+    { id: 's7e1', title: 'Lesson 1 — Trends', type: 'inline', content: `<p>???? ????? ????? ????????? ?? ????? ????.</p>` }
+  ]},
+  { id: 's8', name: 'Research Methods', desc: 'Basics of ed research', exams: [
+    { id: 's8e1', title: 'Lesson 3 — Sampling', type: 'inline', content: `<p>???? ??? ?????? ?????? ?????? ???.</p>` }
+  ]}
+];
+
+/* ====== ???????? ????? ?????? ====== */
+const home = document.getElementById('home');
+const subjectView = document.getElementById('subject-view');
+const examView = document.getElementById('exam-view');
+const subjectTitle = document.getElementById('subjectTitle');
+const subjectDesc = document.getElementById('subjectDesc');
+const examsList = document.getElementById('examsList');
+const examContent = document.getElementById('examContent');
+const examTitle = document.getElementById('examTitle');
+
+function buildHome(){
+  home.innerHTML = '';
+  subjects.forEach(s=>{
+    const card = document.createElement('button');
+    card.className = 'card';
+    card.innerHTML = `<h3>${s.name}</h3><p>${s.desc}</p>`;
+    card.onclick = ()=> openSubject(s.id);
+    home.appendChild(card);
+  });
+}
+function openSubject(id){
+  const s = subjects.find(x=>x.id===id);
+  if(!s) return;
+  subjectTitle.textContent = s.name;
+  subjectDesc.textContent = s.desc || '';
+  examsList.innerHTML = '';
+  s.exams.forEach(e=>{
+    const li = document.createElement('li');
+    li.className = 'exam-item';
+    const btn = document.createElement('button');
+    btn.className = 'exam-btn';
+    btn.textContent = e.title;
+    btn.onclick = ()=> openExam(id, e.id);
+    li.appendChild(btn);
+    // if pdf, add download link small
+    if(e.type === 'pdf' && e.href){
+      const a = document.createElement('a');
+      a.className='pdf-link';
+      a.href = e.href;
+      a.target = '_blank';
+      a.textContent = ' (??? / ????? PDF)';
+      li.appendChild(a);
+    }
+    examsList.appendChild(li);
+  });
+  home.classList.add('hidden');
+  examView.classList.add('hidden');
+  subjectView.classList.remove('hidden');
+}
+function openExam(subjectId, examId){
+  const s = subjects.find(x=>x.id===subjectId);
+  const e = s && s.exams.find(x=>x.id===examId);
+  if(!e) return;
+  examTitle.textContent = e.title;
+  if(e.type === 'pdf' && e.href){
+    examContent.innerHTML = `<p>??? ?????? ????? PDF — ???? ?????? ?????/??????:</p>
+      <p><a href="${e.href}" target="_blank">${e.href}</a></p>`;
+  } else {
+    examContent.innerHTML = e.content || '<p>?? ???? ????? ???.</p>';
+  }
+  subjectView.classList.add('hidden');
+  examView.classList.remove('hidden');
+}
+document.getElementById('backBtn').onclick = () => {
+  subjectView.classList.add('hidden');
+  home.classList.remove('hidden');
+};
+document.getElementById('backToSubject').onclick = () => {
+  examView.classList.add('hidden');
+  subjectView.classList.remove('hidden');
+};
+
+document.getElementById('year').textContent = new Date().getFullYear();
+buildHome();
+</script>
+</body>
+</html>
